@@ -6,10 +6,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useCreateTask, useTasks, useUpdateTask } from '@/hooks/useTasks';
+import { useCreateTask, useTasks, useUpdateTask, taskKeys } from '@/hooks/useTasks';
 import { useProfiles } from '@/hooks/useProfiles';
 import { X, Loader2, Plus, MoveDown } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface CreateTaskModalProps {
   parentId: string | null;
@@ -23,6 +24,7 @@ export function CreateTaskModal({
   onClose,
 }: CreateTaskModalProps) {
   const { data: profiles = [] } = useProfiles();
+  const queryClient = useQueryClient();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const { data: existingChildren = [] } = useTasks(parentId);
@@ -53,6 +55,23 @@ export function CreateTaskModal({
           .update({ parent_id: newTask.id })
           .eq('id', child.id);
       }
+
+      // キャッシュを無効化して、UIを更新
+      // 全タスクリストを無効化（親タスクと新タスクの両方の子リストが更新される）
+      queryClient.invalidateQueries({
+        queryKey: taskKeys.lists(),
+        exact: false
+      });
+      // 全てのタスク詳細クエリを無効化
+      queryClient.invalidateQueries({
+        queryKey: taskKeys.all,
+        predicate: (query) => query.queryKey[0] === 'tasks' && query.queryKey[1] === 'detail'
+      });
+      // 全ての進捗クエリを無効化
+      queryClient.invalidateQueries({
+        queryKey: taskKeys.all,
+        predicate: (query) => query.queryKey[0] === 'tasks' && query.queryKey[1] === 'progress'
+      });
     }
 
     // フォームをリセット
