@@ -37,12 +37,12 @@ export function TaskItem({
   return (
     <div
       className={cn(
-        'group relative rounded-lg border p-3 transition-all',
-        !isDisabled && 'cursor-pointer hover:shadow-md',
+        'group relative rounded-xl border p-4 transition-all',
+        !isDisabled && 'cursor-pointer hover:shadow-lg active:scale-[0.98]',
         isDisabled && 'cursor-default opacity-60',
         isSelected && 'ring-2 ring-blue-500',
-        isCreatedByCurrentUser && 'bg-blue-50 border-blue-200',
-        !isCreatedByCurrentUser && 'bg-white border-gray-200'
+        isCreatedByCurrentUser && 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200',
+        !isCreatedByCurrentUser && 'bg-white border-gray-200 hover:border-gray-300'
       )}
       onClick={onClick}
     >
@@ -86,14 +86,14 @@ export function TaskItem({
 
           {/* 進捗バー（子タスクがある場合のみ） */}
           {hasChildren && (
-            <div className="mt-2">
-              <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                <span>進捗</span>
-                <span>{Math.round(progress)}%</span>
+            <div className="mt-3">
+              <div className="flex items-center justify-between text-xs font-medium text-gray-600 mb-1.5">
+                <span>進捗状況</span>
+                <span className="text-blue-600">{Math.round(progress)}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div className="w-full bg-gray-200 rounded-full h-2 shadow-inner">
                 <div
-                  className="bg-blue-500 h-1.5 rounded-full transition-all"
+                  className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -103,14 +103,14 @@ export function TaskItem({
 
         {/* 子タスクがある場合は矢印アイコン */}
         {hasChildren && (
-          <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+          <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 md:block hidden" />
         )}
       </div>
 
       {/* 作成者ハイライトインジケーター */}
       {isCreatedByCurrentUser && (
-        <div className="absolute top-2 right-2">
-          <div className="w-2 h-2 bg-blue-500 rounded-full" />
+        <div className="absolute top-3 right-3">
+          <div className="w-2.5 h-2.5 bg-blue-600 rounded-full shadow-md" />
         </div>
       )}
     </div>

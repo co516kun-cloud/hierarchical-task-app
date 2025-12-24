@@ -43,6 +43,7 @@ export default function HomePage() {
           <MobileDrillDown
             filter={filter}
             onCreateTask={handleCreateTask}
+            onFilterChange={setFilter}
           />
         </div>
       </div>
