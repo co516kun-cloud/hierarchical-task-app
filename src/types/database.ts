@@ -72,6 +72,7 @@ export interface UpdateTaskInput {
   description?: string;
   is_completed?: boolean;
   assigned_to?: string | null;
+  parent_id?: string | null;
 }
 
 // ===================================

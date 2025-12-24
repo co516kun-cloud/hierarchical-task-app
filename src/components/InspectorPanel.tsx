@@ -5,10 +5,10 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useTask, useUpdateTask, useDeleteTask } from '@/hooks/useTasks';
+import { useState, useEffect, useMemo } from 'react';
+import { useTask, useUpdateTask, useDeleteTask, useAllTasks } from '@/hooks/useTasks';
 import { useProfiles } from '@/hooks/useProfiles';
-import { Loader2, Save, Trash2, User, Calendar, CheckCircle2 } from 'lucide-react';
+import { Loader2, Save, Trash2, User, Calendar, CheckCircle2, FolderTree } from 'lucide-react';
 
 interface InspectorPanelProps {
   taskId: string;
@@ -17,13 +17,35 @@ interface InspectorPanelProps {
 export function InspectorPanel({ taskId }: InspectorPanelProps) {
   const { data: task, isLoading } = useTask(taskId);
   const { data: profiles = [] } = useProfiles();
+  const { data: allTasks = [] } = useAllTasks();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
+  const [parentId, setParentId] = useState<string>('');
   const [isCompleted, setIsCompleted] = useState(false);
+
+  // 子孫タスクのIDリストを取得（循環参照を防ぐため）
+  const descendantIds = useMemo(() => {
+    if (!task) return [];
+
+    const getDescendants = (taskId: string): string[] => {
+      const children = allTasks.filter(t => t.parent_id === taskId);
+      return [
+        taskId,
+        ...children.flatMap(child => getDescendants(child.id))
+      ];
+    };
+
+    return getDescendants(task.id);
+  }, [task, allTasks]);
+
+  // 親タスク候補リスト（自分自身と子孫タスクは除外）
+  const availableParents = useMemo(() => {
+    return allTasks.filter(t => !descendantIds.includes(t.id));
+  }, [allTasks, descendantIds]);
 
   // タスクデータが読み込まれたらフォームを初期化
   useEffect(() => {
@@ -31,6 +53,7 @@ export function InspectorPanel({ taskId }: InspectorPanelProps) {
       setTitle(task.title);
       setDescription(task.description || '');
       setAssignedTo(task.assigned_to || '');
+      setParentId(task.parent_id || '');
       setIsCompleted(task.is_completed);
     }
   }, [task]);
@@ -44,6 +67,7 @@ export function InspectorPanel({ taskId }: InspectorPanelProps) {
         title,
         description,
         assigned_to: assignedTo || null,
+        parent_id: parentId || null,
         is_completed: isCompleted,
       },
     });
@@ -124,6 +148,26 @@ export function InspectorPanel({ taskId }: InspectorPanelProps) {
             {profiles.map((profile) => (
               <option key={profile.id} value={profile.id}>
                 {profile.username}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* 親タスク */}
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            <FolderTree className="w-3 h-3 inline mr-1" />
+            親タスク
+          </label>
+          <select
+            value={parentId}
+            onChange={(e) => setParentId(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">ルート（親なし）</option>
+            {availableParents.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.title}
               </option>
             ))}
           </select>

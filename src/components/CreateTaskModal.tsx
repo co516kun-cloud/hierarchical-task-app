@@ -6,9 +6,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useCreateTask } from '@/hooks/useTasks';
+import { useCreateTask, useTasks, useUpdateTask } from '@/hooks/useTasks';
 import { useProfiles } from '@/hooks/useProfiles';
-import { X, Loader2, Plus } from 'lucide-react';
+import { X, Loader2, Plus, MoveDown } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface CreateTaskModalProps {
   parentId: string | null;
@@ -23,27 +24,42 @@ export function CreateTaskModal({
 }: CreateTaskModalProps) {
   const { data: profiles = [] } = useProfiles();
   const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
+  const { data: existingChildren = [] } = useTasks(parentId);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
+  const [inheritChildren, setInheritChildren] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim()) return;
 
-    await createTask.mutateAsync({
+    // 新しいタスクを作成
+    const newTask = await createTask.mutateAsync({
       parent_id: parentId,
       title: title.trim(),
       description: description.trim(),
       assigned_to: assignedTo || null,
     });
 
+    // 子タスクを引き継ぐ場合、既存の子タスクの親を新しいタスクに変更
+    if (inheritChildren && existingChildren.length > 0) {
+      for (const child of existingChildren) {
+        await supabase
+          .from('tasks')
+          .update({ parent_id: newTask.id })
+          .eq('id', child.id);
+      }
+    }
+
     // フォームをリセット
     setTitle('');
     setDescription('');
     setAssignedTo('');
+    setInheritChildren(false);
     onClose();
   };
 
@@ -113,6 +129,29 @@ export function CreateTaskModal({
               ))}
             </select>
           </div>
+
+          {/* 子タスクを引き継ぐ */}
+          {parentId && existingChildren.length > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={inheritChildren}
+                  onChange={(e) => setInheritChildren(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-0.5"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-1 text-sm font-medium text-gray-700">
+                    <MoveDown className="w-4 h-4 text-blue-600" />
+                    <span>子タスクを引き継ぐ</span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">
+                    親タスクの既存の子タスク（{existingChildren.length}件）を、この新しいタスクの子タスクに移動します
+                  </p>
+                </div>
+              </label>
+            </div>
+          )}
 
           {/* アクションボタン */}
           <div className="flex gap-2 pt-2">

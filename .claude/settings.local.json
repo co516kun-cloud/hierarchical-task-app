@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "WebSearch",
+      "Bash(npm audit:*)",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate Next.js to 15.1.11 to fix critical security vulnerabilities\n\n- Update Next.js from 15.1.2 to 15.1.11\n- Update eslint-config-next to match Next.js version\n- Fixes CVE-2025-66478 \\(Remote Code Execution\\)\n- Fixes CVE-2025-55184 \\(Denial of Service\\)\n- Fixes CVE-2025-55183 \\(Source Code Exposure\\)\n- Fixes CVE-2025-67779 \\(Complete DoS Fix\\)\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }

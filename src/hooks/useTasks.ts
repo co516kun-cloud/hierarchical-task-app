@@ -242,3 +242,27 @@ export const useDeleteTask = () => {
     },
   });
 };
+
+// ===================================
+// Fetch All Tasks (for parent selection)
+// ===================================
+export const useAllTasks = () => {
+  return useQuery({
+    queryKey: [...taskKeys.all, 'all-tasks'] as const,
+    queryFn: async (): Promise<TaskWithProfile[]> => {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select(
+          `
+          *,
+          creator:profiles!tasks_created_by_fkey(id, username, avatar_url),
+          assignee:profiles!tasks_assigned_to_fkey(id, username, avatar_url)
+        `
+        )
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+};
