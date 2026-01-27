@@ -143,6 +143,10 @@ export const useCreateTask = () => {
         queryKey: taskKeys.lists(),
         exact: false
       });
+      // 全タスク一覧を無効化（親タスク選択用）
+      queryClient.invalidateQueries({
+        queryKey: [...taskKeys.all, 'all-tasks']
+      });
       // 全てのタスク詳細クエリを無効化（親タスクの自動完了が反映される）
       queryClient.invalidateQueries({
         queryKey: taskKeys.all,
@@ -187,6 +191,10 @@ export const useUpdateTask = () => {
         queryKey: taskKeys.lists(),
         exact: false
       });
+      // 全タスク一覧を無効化（親タスク選択用）
+      queryClient.invalidateQueries({
+        queryKey: [...taskKeys.all, 'all-tasks']
+      });
       // 全てのタスク詳細クエリを無効化（親タスクの自動完了が反映される）
       queryClient.invalidateQueries({
         queryKey: taskKeys.all,
@@ -228,6 +236,10 @@ export const useDeleteTask = () => {
       queryClient.invalidateQueries({
         queryKey: taskKeys.lists(),
         exact: false
+      });
+      // 全タスク一覧を無効化（親タスク選択用）
+      queryClient.invalidateQueries({
+        queryKey: [...taskKeys.all, 'all-tasks']
       });
       // 全てのタスク詳細クエリを無効化（親タスクの自動完了が反映される）
       queryClient.invalidateQueries({
