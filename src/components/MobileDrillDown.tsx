@@ -11,7 +11,7 @@ import { TaskItem } from './TaskItem';
 import { MobileFilterMenu } from './MobileFilterMenu';
 import { MobileTaskDetail } from './MobileTaskDetail';
 import { TaskFilter } from '@/types/database';
-import { ArrowLeft, Plus, Loader2, Home, Menu, Filter } from 'lucide-react';
+import { ArrowLeft, Plus, Loader2, Home, Menu, Filter, Info } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useProfiles } from '@/hooks/useProfiles';
 
@@ -202,30 +202,28 @@ export function MobileDrillDown({
           return (
             <div
               key={task.id}
-              onClick={() => {
-                // タスク詳細を開く
-                setSelectedTaskId(task.id);
-                onTaskSelect?.(task.id);
-              }}
+              className="relative"
             >
-              <TaskItem
-                task={task}
-                onClick={() => {}}
-                hasChildren={hasChildren}
-                showUserHighlight={!filter?.userId}
-              />
-              {/* 子タスクがある場合はドリルダウンボタンを追加 */}
-              {hasChildren && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleTaskClick(task.id, task.title);
-                  }}
-                  className="mt-2 w-full py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-700 rounded-xl font-medium text-sm transition-all border border-blue-200"
-                >
-                  子タスクを表示 ({childrenCount[task.id]})
-                </button>
-              )}
+              {/* タスクをタップで子階層に移動 */}
+              <div onClick={() => handleTaskClick(task.id, task.title)}>
+                <TaskItem
+                  task={task}
+                  onClick={() => {}}
+                  hasChildren={hasChildren}
+                  showUserHighlight={!filter?.userId}
+                />
+              </div>
+              {/* 詳細ボタン（右下に配置） */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedTaskId(task.id);
+                  onTaskSelect?.(task.id);
+                }}
+                className="absolute bottom-3 right-3 p-2 bg-white hover:bg-gray-100 rounded-full shadow-md border border-gray-200 transition-colors"
+              >
+                <Info className="w-4 h-4 text-gray-600" />
+              </button>
             </div>
           );
         })}
