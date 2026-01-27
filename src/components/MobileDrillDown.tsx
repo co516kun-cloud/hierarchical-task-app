@@ -213,14 +213,14 @@ export function MobileDrillDown({
                   showUserHighlight={!filter?.userId}
                 />
               </div>
-              {/* 詳細ボタン（右下に配置） */}
+              {/* 詳細ボタン（右中央に配置） */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedTaskId(task.id);
                   onTaskSelect?.(task.id);
                 }}
-                className="absolute bottom-3 right-3 p-2 bg-white hover:bg-gray-100 rounded-full shadow-md border border-gray-200 transition-colors"
+                className="absolute top-1/2 -translate-y-1/2 right-3 p-2 bg-white hover:bg-gray-100 rounded-full shadow-md border border-gray-200 transition-colors"
               >
                 <Info className="w-4 h-4 text-gray-600" />
               </button>
